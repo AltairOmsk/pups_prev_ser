@@ -746,7 +746,7 @@ case TX:
               *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2)) = 0;
             }
           break;
-        default:
+        default: 
           break;
         }   
 break;  
