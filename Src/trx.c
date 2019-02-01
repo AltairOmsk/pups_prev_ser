@@ -708,17 +708,37 @@ case RX:
         switch (R.ADC_DataReady){
           case HALF_RX:                                                         //  HALF 
             for (i=0;i<(HALF_DMA_SHIFT/2);i++){                                 //  В начало буфера передачи положить 48 отсчетов для DAC, с шагом 2
+<<<<<<< .mine
               *(R.CodecTxData + RIGHT_CH + (i*2)) = rx_USB (*(R.CodecRxData + RIGHT_CH + (i*2)));
               *(R.CodecTxData + LEFT_CH  + (i*2)) = 0;
               Tmp_u32 += abs(*(R.CodecTxData + RIGHT_CH + (i*2)));              // For S meter
+
+
+=======
+              *(R.CodecTxData + RIGHT_CH + (i*2)) = rx_USB (*(R.CodecRxData + RIGHT_CH + (i*2)));
+              *(R.CodecTxData + LEFT_CH  + (i*2)) = 0;
+              
+              //*(R.CodecTxData + i*2) = rx_USB (*(R.CodecRxData + i*2));
+              //Tmp_u32 += abs(*(R.CodecTxData + RIGHT_CH + (i*2)));              // For S meter
+>>>>>>> .theirs
             }
           break;
           
           case COMPLETE_RX:                                                     // COMPLETE
             for (i=0;i<(HALF_DMA_SHIFT/2);i++){                                 //  В начало буфера передачи положить 48 отсчетов для DAC, с шагом 2
+<<<<<<< .mine
               *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2)) = rx_USB (*(R.CodecRxData + HALF_DMA_SHIFT + RIGHT_CH + (i*2)));
               *(R.CodecTxData + LEFT_CH  + HALF_DMA_SHIFT + (i*2)) = 0;
               Tmp_u32 += *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2));  // For S meter
+
+
+=======
+              *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2)) = rx_USB (*(R.CodecRxData + HALF_DMA_SHIFT + RIGHT_CH + (i*2)));
+              *(R.CodecTxData + LEFT_CH  + HALF_DMA_SHIFT + (i*2)) = 0;
+              
+              //*(R.CodecTxData + HALF_DMA_SHIFT + i*2) = rx_USB (*(R.CodecRxData + HALF_DMA_SHIFT + i*2));
+              //Tmp_u32 += *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2));  // For S meter
+>>>>>>> .theirs
             }
           break;
         default:
@@ -962,8 +982,29 @@ float Tmp_f;
   
   if (R.RXBW == RXBW_BYPASS) R.SSB_Out_F = In;
 
+<<<<<<< .mine
   return R.SSB_Out_F;
+=======
+  int32_t Tmp = (int16_t)R.SSB_Out_F;                                           // Явно выход превращаем в int16
+>>>>>>> .theirs
   
+<<<<<<< .mine
+
+
+
+
+
+
+
+=======
+  Out_u32 = (Tmp << 16);                                                        // Сдвигаем в правый канал
+  
+            //__LED2_OFF;
+  
+  //return Out_u32;
+  return In;
+  
+>>>>>>> .theirs
 }
 
 
