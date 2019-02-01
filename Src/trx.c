@@ -356,7 +356,7 @@ static float LPF128_coeff[128] = {
 // Секция прототипов локальных функций
 //******************************************************************************
 static void    uSD_audio_record         (float   In);
-static int16_t rx_USB                   (int16_t In);
+static int32_t rx_USB                   (int32_t In);
 static int16_t tx_USB                   (int16_t In);
 static int16_t tx_test_signal_tone      (int16_t In);
 static int16_t tx_test_voice            (int16_t In);
@@ -708,35 +708,20 @@ case RX:
         switch (R.ADC_DataReady){
           case HALF_RX:                                                         //  HALF 
             for (i=0;i<(HALF_DMA_SHIFT/2);i++){                                 //  В начало буфера передачи положить 48 отсчетов для DAC, с шагом 2
-//              *(R.CodecTxData + RIGHT_CH + (i*2)) = rx_USB (*(R.CodecRxData + RIGHT_CH + (i*2)));
-//              *(R.CodecTxData + LEFT_CH  + (i*2)) = 0;
-//
-//              Tmp_u32 += abs(*(R.CodecTxData + RIGHT_CH + (i*2)));              // For S meter
 
-              
               *((uint32_t*)(R.CodecTxData + i*2)) = rx_USB (*((uint32_t*)(R.CodecRxData + i*2)));
-              
-     
-              
-              //Tmp_u32 += abs(*(R.CodecTxData + RIGHT_CH + (i*2)));              // For S meter
+
+              Tmp_u32 += abs(*(R.CodecTxData + RIGHT_CH + (i*2)));              // For S meter
 
             }
           break;
           
           case COMPLETE_RX:                                                     // COMPLETE
             for (i=0;i<(HALF_DMA_SHIFT/2);i++){                                 //  В начало буфера передачи положить 48 отсчетов для DAC, с шагом 2
-//              *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2)) = rx_USB (*(R.CodecRxData + HALF_DMA_SHIFT + RIGHT_CH + (i*2)));
-//              *(R.CodecTxData + LEFT_CH  + HALF_DMA_SHIFT + (i*2)) = 0;
-//
-//              Tmp_u32 += *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2));  // For S meter
 
-              
               *((uint32_t*)(R.CodecTxData + HALF_DMA_SHIFT + i*2)) = rx_USB (*((uint32_t*)(R.CodecRxData + HALF_DMA_SHIFT + i*2)));
-              
-              
-              
-              
-              //Tmp_u32 += *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2));  // For S meter
+
+              Tmp_u32 += *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2));  // For S meter
 
             }
           break;
@@ -903,14 +888,15 @@ break;
 Берем на вход отсчет АЦП с дискретизацией 48828 кГц и такой же отсчет кладем на выход.
 
 */
-static int16_t rx_USB (int16_t In){
+static int32_t rx_USB (int32_t In){
 float Tmp_f;
+uint32_t Out_u32;
   
   //__LED2_ON;
   
   R.SSB_Out_F = 0;                                                              // Подготовка
 
-  R.Tmp_i32 = HP_Filter(In);                                                    // Для явной конверсии в int32
+  R.Tmp_i32 = HP_Filter(In>>16);                                                // Для явной конверсии в int32
   
   dds16(&R.DDS_RX);                                                             // Генерируем два отсчета I и Q
 
@@ -981,29 +967,15 @@ float Tmp_f;
   
   if (R.RXBW == RXBW_BYPASS) R.SSB_Out_F = In;
 
-<<<<<<< .mine
-  return R.SSB_Out_F;
-=======
+  //return R.SSB_Out_F;
+
   int32_t Tmp = (int16_t)R.SSB_Out_F;                                           // Явно выход превращаем в int16
->>>>>>> .theirs
-  
-<<<<<<< .mine
 
-
-
-
-
-
-
-=======
   Out_u32 = (Tmp << 16);                                                        // Сдвигаем в правый канал
   
             //__LED2_OFF;
   
-  //return Out_u32;
-  return In;
-  
->>>>>>> .theirs
+  return Out_u32;  
 }
 
 
