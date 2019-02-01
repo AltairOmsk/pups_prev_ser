@@ -894,9 +894,10 @@ uint32_t Out_u32;
   
   //__LED2_ON;
   
+  // MAGNIT --------------------------------------------------------------------
   R.SSB_Out_F = 0;                                                              // Подготовка
 
-  R.Tmp_i32 = HP_Filter(In>>16);                                                // Для явной конверсии в int32
+  R.Tmp_i32 = HP_Filter(In>>16);                                                // Для явной конверсии в int32. Старшие биты - правый канал
   
   dds16(&R.DDS_RX);                                                             // Генерируем два отсчета I и Q
 
@@ -904,10 +905,27 @@ uint32_t Out_u32;
   R.Buf_LPF_48k_Q[R.Buf_LPF_48k_idx + 66] = R.DDS_RX.Q * R.Tmp_i32 * 15;
   
   R.SSB_Out_F = R.Buf_48k_Out[R.Buf_LPF_48k_idx];                               // Выходной отсчет из буфера интерполятора
+  //============================================================================
+  
+  
+  // GA ------------------------------------------------------------------------
+  R.GA_SSB_Out_F = 0;                                                           // Подготовка
+
+  R.Tmp_i32 = HP_Filter(In & 0xFFFF);                                           // Для явной конверсии в int32. Только младшие биты - левый канал
+  
+  dds16(&R.DDS_GA);                                                             // Генерируем два отсчета I и Q
+
+  R.GA_Buf_LPF_48k_I[R.GA_Buf_LPF_48k_idx + 66] = R.DDS_GA.I * R.Tmp_i32 * 15;  // Первый смеситель. Домножение - компенсация потерь в дециматоре
+  R.GA_Buf_LPF_48k_Q[R.GA_Buf_LPF_48k_idx + 66] = R.DDS_GA.Q * R.Tmp_i32 * 15;
+  
+  R.GA_SSB_Out_F = R.GA_Buf_48k_Out[R.GA_Buf_LPF_48k_idx];                      // Выходной отсчет из буфера интерполятора
+  //============================================================================
   
   // Домен 8 кГц
   if(++R.Buf_LPF_48k_idx == 6) {                                                // Если не накопилось 6 отсчетов - сразу на выход
   
+    
+  // MAGNIT --------------------------------------------------------------------  
   R.Buf_LPF_48k_idx = 0;                                                        // Здесь начинается домен 8138 Гц. Подготовка к новому циклу.
 
   R.Buf_LPF_8k_I[127] = LPF_72 (R.Buf_LPF_48k_I, LPF72_coeff_Decimation);       // Фильтр дециматор в конец поворачивающего фильтра
@@ -960,7 +978,51 @@ uint32_t Out_u32;
   
   filter_interpolator_x6 (R.Buf_48k_Out_Work, LPF72_coeff_Interpolation, R.Buf_48k_Out); // Применяем интерполятор.
   shift_buf (R.Buf_48k_Out_Work, 12);                                           // Сдвиг буфера интерполятора на 1 отсчет
-    
+  //============================================================================
+
+
+  // GA ------------------------------------------------------------------------  
+  R.GA_Buf_LPF_48k_idx = 0;                                                        // Здесь начинается домен 8138 Гц. Подготовка к новому циклу.
+
+  R.GA_Buf_LPF_8k_I[127] = LPF_72 (R.GA_Buf_LPF_48k_I, LPF72_coeff_Decimation);       // Фильтр дециматор в конец поворачивающего фильтра
+  R.GA_Buf_LPF_8k_Q[127] = LPF_72 (R.GA_Buf_LPF_48k_Q, LPF72_coeff_Decimation);
+  shift_buf_72_6 (R.GA_Buf_LPF_48k_I);                                             // Сдвиг буфера дециматора на 6 - подготовка к новому циклу
+  shift_buf_72_6 (R.GA_Buf_LPF_48k_Q);
+  
+  
+  R.TmpI = LPF_128 (R.GA_Buf_LPF_8k_I, LPF128_coeff_I);                            // Применяем поворачивающий фильтр основной селекции
+  R.TmpQ = LPF_128 (R.GA_Buf_LPF_8k_Q, LPF128_coeff_Q);
+  shift_buf_128(R.GA_Buf_LPF_8k_I);                                                // Сдвигаем буфера - готовим к новому циклу
+  shift_buf_128(R.GA_Buf_LPF_8k_Q);
+  
+  if (R.GA_USB_On) R.GA_Buf_BPF_8k[127] = (R.TmpI + R.TmpQ) ;                         // Формируем выходной USB низкочастотный сигнал в последний элемент буфера полосового филльтра
+  else R.GA_Buf_BPF_8k[127] = (R.TmpI - R.TmpQ) ;                                  // LSB
+  
+  switch (R.GA_RXBW){                                                              // Применяем полосовой фильтр и укладываем в интерполятор новый отсчет
+  case RXBW_NARROW:                                                     
+    R.GA_Buf_48k_Out_Work[11] = LPF_128 (R.GA_Buf_BPF_8k, LPF128_coeff_BPF_Tone_N);   // Узкая полоса 400 Гц
+    break;
+  case RXBW_MEDIUM:
+    R.GA_Buf_48k_Out_Work[11] = LPF_128 (R.GA_Buf_BPF_8k, LPF128_coeff_BPF_Tone_M);   // Средняя пооса 1 кГц
+    break;
+  case RXBW_WIDE:
+    R.GA_Buf_48k_Out_Work[11] = LPF_128 (R.GA_Buf_BPF_8k, LPF128_coeff_BPF);          // Широкая полоса 3 кГц
+    break;
+  default:
+    R.GA_Buf_48k_Out_Work[11] = LPF_128 (R.GA_Buf_BPF_8k, LPF128_coeff_BPF);          // Широкая полоса 3 кГц
+  }
+
+        
+  shift_buf_128(R.GA_Buf_BPF_8k);                                                  // Сдвиг буфера полосового фильтра
+  
+  filter_interpolator_x6 (R.GA_Buf_48k_Out_Work, LPF72_coeff_Interpolation, R.GA_Buf_48k_Out); // Применяем интерполятор.
+  shift_buf (R.GA_Buf_48k_Out_Work, 12);                                           // Сдвиг буфера интерполятора на 1 отсчет
+  //============================================================================
+
+
+
+
+  
   }// Конец домена 8 кГц
     
   //__LED2_OFF;
