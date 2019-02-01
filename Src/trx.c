@@ -708,37 +708,36 @@ case RX:
         switch (R.ADC_DataReady){
           case HALF_RX:                                                         //  HALF 
             for (i=0;i<(HALF_DMA_SHIFT/2);i++){                                 //  В начало буфера передачи положить 48 отсчетов для DAC, с шагом 2
-<<<<<<< .mine
-              *(R.CodecTxData + RIGHT_CH + (i*2)) = rx_USB (*(R.CodecRxData + RIGHT_CH + (i*2)));
-              *(R.CodecTxData + LEFT_CH  + (i*2)) = 0;
-              Tmp_u32 += abs(*(R.CodecTxData + RIGHT_CH + (i*2)));              // For S meter
+//              *(R.CodecTxData + RIGHT_CH + (i*2)) = rx_USB (*(R.CodecRxData + RIGHT_CH + (i*2)));
+//              *(R.CodecTxData + LEFT_CH  + (i*2)) = 0;
+//
+//              Tmp_u32 += abs(*(R.CodecTxData + RIGHT_CH + (i*2)));              // For S meter
 
-
-=======
-              *(R.CodecTxData + RIGHT_CH + (i*2)) = rx_USB (*(R.CodecRxData + RIGHT_CH + (i*2)));
-              *(R.CodecTxData + LEFT_CH  + (i*2)) = 0;
               
-              //*(R.CodecTxData + i*2) = rx_USB (*(R.CodecRxData + i*2));
+              *((uint32_t*)(R.CodecTxData + i*2)) = rx_USB (*((uint32_t*)(R.CodecRxData + i*2)));
+              
+     
+              
               //Tmp_u32 += abs(*(R.CodecTxData + RIGHT_CH + (i*2)));              // For S meter
->>>>>>> .theirs
+
             }
           break;
           
           case COMPLETE_RX:                                                     // COMPLETE
             for (i=0;i<(HALF_DMA_SHIFT/2);i++){                                 //  В начало буфера передачи положить 48 отсчетов для DAC, с шагом 2
-<<<<<<< .mine
-              *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2)) = rx_USB (*(R.CodecRxData + HALF_DMA_SHIFT + RIGHT_CH + (i*2)));
-              *(R.CodecTxData + LEFT_CH  + HALF_DMA_SHIFT + (i*2)) = 0;
-              Tmp_u32 += *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2));  // For S meter
+//              *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2)) = rx_USB (*(R.CodecRxData + HALF_DMA_SHIFT + RIGHT_CH + (i*2)));
+//              *(R.CodecTxData + LEFT_CH  + HALF_DMA_SHIFT + (i*2)) = 0;
+//
+//              Tmp_u32 += *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2));  // For S meter
 
-
-=======
-              *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2)) = rx_USB (*(R.CodecRxData + HALF_DMA_SHIFT + RIGHT_CH + (i*2)));
-              *(R.CodecTxData + LEFT_CH  + HALF_DMA_SHIFT + (i*2)) = 0;
               
-              //*(R.CodecTxData + HALF_DMA_SHIFT + i*2) = rx_USB (*(R.CodecRxData + HALF_DMA_SHIFT + i*2));
+              *((uint32_t*)(R.CodecTxData + HALF_DMA_SHIFT + i*2)) = rx_USB (*((uint32_t*)(R.CodecRxData + HALF_DMA_SHIFT + i*2)));
+              
+              
+              
+              
               //Tmp_u32 += *(R.CodecTxData + RIGHT_CH + HALF_DMA_SHIFT + (i*2));  // For S meter
->>>>>>> .theirs
+
             }
           break;
         default:
