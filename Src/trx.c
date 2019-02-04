@@ -373,6 +373,8 @@ static void    shift_buf_128            (float *In);
 static float   LPF_128                  (float *in, float *coeff);
 static float   LPF_128_I                (float *in, float *coeff);
 static float   LPF_128_Q                (float *in, float *coeff);
+static float   LPF_128_SIN              (float *in, float *coeff);
+static float   LPF_128_COS              (float *in, float *coeff);
 static void    AGC                      (float *in);
 
 
@@ -892,7 +894,7 @@ static int32_t rx_USB (int32_t In){
 float Tmp_f;
 uint32_t Out_u32;
   
-  //__LED2_ON;
+  __LED2_ON;
   
   // MAGNIT --------------------------------------------------------------------
   R.SSB_Out_F = 0;                                                              // Подготовка
@@ -990,8 +992,8 @@ uint32_t Out_u32;
   shift_buf_72_6 (R.GA_Buf_LPF_48k_Q);
   
   
-  R.TmpI = LPF_128 (R.GA_Buf_LPF_8k_I, LPF128_coeff_I);                            // Применяем поворачивающий фильтр основной селекции
-  R.TmpQ = LPF_128 (R.GA_Buf_LPF_8k_Q, LPF128_coeff_Q);
+  R.TmpI = LPF_128_COS (R.GA_Buf_LPF_8k_I, LPF128_coeff_I);                            // Применяем поворачивающий фильтр основной селекции
+  R.TmpQ = LPF_128_SIN (R.GA_Buf_LPF_8k_Q, LPF128_coeff_Q);
   shift_buf_128(R.GA_Buf_LPF_8k_I);                                                // Сдвигаем буфера - готовим к новому циклу
   shift_buf_128(R.GA_Buf_LPF_8k_Q);
   
@@ -1035,7 +1037,7 @@ uint32_t Out_u32;
 
   Out_u32 = (Tmp << 16);                                                        // Сдвигаем в правый канал
   
-            //__LED2_OFF;
+            __LED2_OFF;
   
   return Out_u32;  
 }
@@ -1814,146 +1816,430 @@ static void shift_buf_32_6 (float *In) {
 }
 
 
+static float LPF_128_SIN (float *in, float *coeff){
+float Out = 0;  
+    // SIN filter
+    Out += (*(in +   1)) * (*(coeff +   1));
+    Out -= (*(in +   3)) * (*(coeff +   3));
+    Out += (*(in +   5)) * (*(coeff +   5));
+    Out -= (*(in +   7)) * (*(coeff +   7));
+    Out += (*(in +   9)) * (*(coeff +   9));
+    Out -= (*(in +  11)) * (*(coeff +  11));
+    Out += (*(in +  13)) * (*(coeff +  13));
+    Out -= (*(in +  15)) * (*(coeff +  15));
+    Out += (*(in +  17)) * (*(coeff +  17));
+    Out -= (*(in +  19)) * (*(coeff +  19));
+    Out += (*(in +  21)) * (*(coeff +  21));
+    Out -= (*(in +  23)) * (*(coeff +  23));
+    Out += (*(in +  25)) * (*(coeff +  25));
+    Out -= (*(in +  27)) * (*(coeff +  27));
+    Out += (*(in +  29)) * (*(coeff +  29));
+    Out -= (*(in +  31)) * (*(coeff +  31));
+    Out += (*(in +  33)) * (*(coeff +  33));
+    Out -= (*(in +  35)) * (*(coeff +  35));
+    Out += (*(in +  37)) * (*(coeff +  37));
+    Out -= (*(in +  39)) * (*(coeff +  39));
+    Out += (*(in +  41)) * (*(coeff +  41));
+    Out -= (*(in +  43)) * (*(coeff +  43));
+    Out += (*(in +  45)) * (*(coeff +  45));
+    Out -= (*(in +  47)) * (*(coeff +  47));
+    Out += (*(in +  49)) * (*(coeff +  49));
+    Out -= (*(in +  51)) * (*(coeff +  51));
+    Out += (*(in +  53)) * (*(coeff +  53));
+    Out -= (*(in +  55)) * (*(coeff +  55));
+    Out += (*(in +  57)) * (*(coeff +  57));
+    Out -= (*(in +  59)) * (*(coeff +  59));
+    Out += (*(in +  61)) * (*(coeff +  61));
+    Out -= (*(in +  63)) * (*(coeff +  63));
+    Out += (*(in +  65)) * (*(coeff +  65));
+    Out -= (*(in +  67)) * (*(coeff +  67));
+    Out += (*(in +  69)) * (*(coeff +  69));
+    Out -= (*(in +  71)) * (*(coeff +  71));
+    Out += (*(in +  73)) * (*(coeff +  73));
+    Out -= (*(in +  75)) * (*(coeff +  75));
+    Out += (*(in +  77)) * (*(coeff +  77));
+    Out -= (*(in +  79)) * (*(coeff +  79));
+    Out += (*(in +  81)) * (*(coeff +  81));
+    Out -= (*(in +  83)) * (*(coeff +  83));
+    Out += (*(in +  85)) * (*(coeff +  85));
+    Out -= (*(in +  87)) * (*(coeff +  87));
+    Out += (*(in +  89)) * (*(coeff +  89));
+    Out -= (*(in +  91)) * (*(coeff +  91));
+    Out += (*(in +  93)) * (*(coeff +  93));
+    Out -= (*(in +  95)) * (*(coeff +  95));
+    Out += (*(in +  97)) * (*(coeff +  97));
+    Out -= (*(in +  99)) * (*(coeff +  99));
+    Out += (*(in + 101)) * (*(coeff + 101));
+    Out -= (*(in + 103)) * (*(coeff + 103));
+    Out += (*(in + 105)) * (*(coeff + 105));
+    Out -= (*(in + 107)) * (*(coeff + 107));
+    Out += (*(in + 109)) * (*(coeff + 109));
+    Out -= (*(in + 111)) * (*(coeff + 111));
+    Out += (*(in + 113)) * (*(coeff + 113));
+    Out -= (*(in + 115)) * (*(coeff + 115));
+    Out += (*(in + 117)) * (*(coeff + 117));
+    Out -= (*(in + 119)) * (*(coeff + 119));
+    Out += (*(in + 121)) * (*(coeff + 121));
+    Out -= (*(in + 123)) * (*(coeff + 123));
+    Out += (*(in + 125)) * (*(coeff + 125));
+    Out -= (*(in + 127)) * (*(coeff + 127));
+    
+    return Out;
+}
+
+static float LPF_128_COS (float *in, float *coeff){
+float Out = 0; 
+
+    // COS filter
+    Out += (*(in +   0)) * (*(coeff +   0));
+    Out -= (*(in +   2)) * (*(coeff +   2));
+    Out += (*(in +   4)) * (*(coeff +   4));
+    Out -= (*(in +   6)) * (*(coeff +   6));
+    Out += (*(in +   8)) * (*(coeff +   8));
+    Out -= (*(in +  10)) * (*(coeff +  10));
+    Out += (*(in +  12)) * (*(coeff +  12));
+    Out -= (*(in +  14)) * (*(coeff +  14));
+    Out += (*(in +  16)) * (*(coeff +  16));
+    Out -= (*(in +  18)) * (*(coeff +  18));
+    Out += (*(in +  20)) * (*(coeff +  20));
+    Out -= (*(in +  22)) * (*(coeff +  22));
+    Out += (*(in +  24)) * (*(coeff +  24));
+    Out -= (*(in +  26)) * (*(coeff +  26));
+    Out += (*(in +  28)) * (*(coeff +  28));
+    Out -= (*(in +  30)) * (*(coeff +  30));
+    Out += (*(in +  32)) * (*(coeff +  32));
+    Out -= (*(in +  34)) * (*(coeff +  34));
+    Out += (*(in +  36)) * (*(coeff +  36));
+    Out -= (*(in +  38)) * (*(coeff +  38));
+    Out += (*(in +  40)) * (*(coeff +  40));
+    Out -= (*(in +  42)) * (*(coeff +  42));
+    Out += (*(in +  44)) * (*(coeff +  44));
+    Out -= (*(in +  46)) * (*(coeff +  46));
+    Out += (*(in +  48)) * (*(coeff +  48));
+    Out -= (*(in +  50)) * (*(coeff +  50));
+    Out += (*(in +  52)) * (*(coeff +  52));
+    Out -= (*(in +  54)) * (*(coeff +  54));
+    Out += (*(in +  56)) * (*(coeff +  56));
+    Out -= (*(in +  58)) * (*(coeff +  58));
+    Out += (*(in +  60)) * (*(coeff +  60));
+    Out -= (*(in +  62)) * (*(coeff +  62));
+    Out += (*(in +  64)) * (*(coeff +  64));
+    Out -= (*(in +  66)) * (*(coeff +  66));
+    Out += (*(in +  68)) * (*(coeff +  68));
+    Out -= (*(in +  70)) * (*(coeff +  70));
+    Out += (*(in +  72)) * (*(coeff +  72));
+    Out -= (*(in +  74)) * (*(coeff +  74));
+    Out += (*(in +  76)) * (*(coeff +  76));
+    Out -= (*(in +  78)) * (*(coeff +  78));
+    Out += (*(in +  80)) * (*(coeff +  80));
+    Out -= (*(in +  82)) * (*(coeff +  82));
+    Out += (*(in +  84)) * (*(coeff +  84));
+    Out -= (*(in +  86)) * (*(coeff +  86));
+    Out += (*(in +  88)) * (*(coeff +  88));
+    Out -= (*(in +  90)) * (*(coeff +  90));
+    Out += (*(in +  92)) * (*(coeff +  92));
+    Out -= (*(in +  94)) * (*(coeff +  94));
+    Out += (*(in +  96)) * (*(coeff +  96));
+    Out -= (*(in +  98)) * (*(coeff +  98));
+    Out += (*(in + 100)) * (*(coeff + 100));
+    Out -= (*(in + 102)) * (*(coeff + 102));
+    Out += (*(in + 104)) * (*(coeff + 104));
+    Out -= (*(in + 106)) * (*(coeff + 106));
+    Out += (*(in + 108)) * (*(coeff + 108));
+    Out -= (*(in + 110)) * (*(coeff + 110));
+    Out += (*(in + 112)) * (*(coeff + 112));
+    Out -= (*(in + 114)) * (*(coeff + 114));
+    Out += (*(in + 116)) * (*(coeff + 116));
+    Out -= (*(in + 118)) * (*(coeff + 118));
+    Out += (*(in + 120)) * (*(coeff + 120));
+    Out -= (*(in + 122)) * (*(coeff + 122));
+    Out += (*(in + 124)) * (*(coeff + 124));
+    Out -= (*(in + 126)) * (*(coeff + 126));
+    
+    return Out;
+}
+
 
 static float LPF_128 (float *in, float *coeff)
 {
   float out1 = 0;
   
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
+  out1 += (*(in +   0) * (*(coeff +   0)));
+  out1 += (*(in +   1) * (*(coeff +   1)));
+  out1 += (*(in +   2) * (*(coeff +   2)));
+  out1 += (*(in +   3) * (*(coeff +   3)));
+  out1 += (*(in +   4) * (*(coeff +   4)));
+  out1 += (*(in +   5) * (*(coeff +   5)));
+  out1 += (*(in +   6) * (*(coeff +   6)));
+  out1 += (*(in +   7) * (*(coeff +   7)));
+  out1 += (*(in +   8) * (*(coeff +   8)));
+  out1 += (*(in +   9) * (*(coeff +   9)));
+  out1 += (*(in +  10) * (*(coeff +  10)));
+   
+  out1 += (*(in +  11) * (*(coeff +  11)));
+  out1 += (*(in +  12) * (*(coeff +  12)));
+  out1 += (*(in +  13) * (*(coeff +  13)));
+  out1 += (*(in +  14) * (*(coeff +  14)));
+  out1 += (*(in +  15) * (*(coeff +  15)));
+  out1 += (*(in +  16) * (*(coeff +  16)));
+  out1 += (*(in +  17) * (*(coeff +  17)));
+  out1 += (*(in +  18) * (*(coeff +  18)));
+  out1 += (*(in +  19) * (*(coeff +  19)));
+  out1 += (*(in +  20) * (*(coeff +  20)));
+   
+  out1 += (*(in +  21) * (*(coeff +  21)));
+  out1 += (*(in +  22) * (*(coeff +  22)));
+  out1 += (*(in +  23) * (*(coeff +  23)));
+  out1 += (*(in +  24) * (*(coeff +  24)));
+  out1 += (*(in +  25) * (*(coeff +  25)));
+  out1 += (*(in +  26) * (*(coeff +  26)));
+  out1 += (*(in +  27) * (*(coeff +  27)));
+  out1 += (*(in +  28) * (*(coeff +  28)));
+  out1 += (*(in +  29) * (*(coeff +  29)));
+  out1 += (*(in +  30) * (*(coeff +  30)));
+   
+  out1 += (*(in +  31) * (*(coeff +  31)));
+  out1 += (*(in +  32) * (*(coeff +  32)));
+  out1 += (*(in +  33) * (*(coeff +  33)));
+  out1 += (*(in +  34) * (*(coeff +  34)));
+  out1 += (*(in +  35) * (*(coeff +  35)));
+  out1 += (*(in +  36) * (*(coeff +  36)));
+  out1 += (*(in +  37) * (*(coeff +  37)));
+  out1 += (*(in +  38) * (*(coeff +  38)));
+  out1 += (*(in +  39) * (*(coeff +  39)));
+  out1 += (*(in +  40) * (*(coeff +  40)));
+   
+  out1 += (*(in +  41) * (*(coeff +  41)));
+  out1 += (*(in +  42) * (*(coeff +  42)));
+  out1 += (*(in +  43) * (*(coeff +  43)));
+  out1 += (*(in +  44) * (*(coeff +  44)));
+  out1 += (*(in +  45) * (*(coeff +  45)));
+  out1 += (*(in +  46) * (*(coeff +  46)));
+  out1 += (*(in +  47) * (*(coeff +  47)));
+  out1 += (*(in +  48) * (*(coeff +  48)));
+  out1 += (*(in +  49) * (*(coeff +  49)));
+  out1 += (*(in +  50) * (*(coeff +  50)));
+   
+  out1 += (*(in +  51) * (*(coeff +  51)));
+  out1 += (*(in +  52) * (*(coeff +  52)));
+  out1 += (*(in +  53) * (*(coeff +  53)));
+  out1 += (*(in +  54) * (*(coeff +  54)));
+  out1 += (*(in +  55) * (*(coeff +  55)));
+  out1 += (*(in +  56) * (*(coeff +  56)));
+  out1 += (*(in +  57) * (*(coeff +  57)));
+  out1 += (*(in +  58) * (*(coeff +  58)));
+  out1 += (*(in +  59) * (*(coeff +  59)));
+  out1 += (*(in +  60) * (*(coeff +  60)));
+   
+  out1 += (*(in +  61) * (*(coeff +  61)));
+  out1 += (*(in +  62) * (*(coeff +  62)));
+  out1 += (*(in +  63) * (*(coeff +  63)));
+  out1 += (*(in +  64) * (*(coeff +  64)));
+  out1 += (*(in +  65) * (*(coeff +  65)));
+  out1 += (*(in +  66) * (*(coeff +  66)));
+  out1 += (*(in +  67) * (*(coeff +  67)));
+  out1 += (*(in +  68) * (*(coeff +  68)));
+  out1 += (*(in +  69) * (*(coeff +  69)));
+  out1 += (*(in +  70) * (*(coeff +  70)));
+   
+  out1 += (*(in +  71) * (*(coeff +  71)));
+  out1 += (*(in +  72) * (*(coeff +  72)));
+  out1 += (*(in +  73) * (*(coeff +  73)));
+  out1 += (*(in +  74) * (*(coeff +  74)));
+  out1 += (*(in +  75) * (*(coeff +  75)));
+  out1 += (*(in +  76) * (*(coeff +  76)));
+  out1 += (*(in +  77) * (*(coeff +  77)));
+  out1 += (*(in +  78) * (*(coeff +  78)));
+  out1 += (*(in +  79) * (*(coeff +  79)));
+  out1 += (*(in +  80) * (*(coeff +  80)));
+   
+  out1 += (*(in +  81) * (*(coeff +  81)));
+  out1 += (*(in +  82) * (*(coeff +  82)));
+  out1 += (*(in +  83) * (*(coeff +  83)));
+  out1 += (*(in +  84) * (*(coeff +  84)));
+  out1 += (*(in +  85) * (*(coeff +  85)));
+  out1 += (*(in +  86) * (*(coeff +  86)));
+  out1 += (*(in +  87) * (*(coeff +  87)));
+  out1 += (*(in +  88) * (*(coeff +  88)));
+  out1 += (*(in +  89) * (*(coeff +  89)));
+  out1 += (*(in +  90) * (*(coeff +  90)));
+   
+  out1 += (*(in +  91) * (*(coeff +  91)));
+  out1 += (*(in +  92) * (*(coeff +  92)));
+  out1 += (*(in +  93) * (*(coeff +  93)));
+  out1 += (*(in +  94) * (*(coeff +  94)));
+  out1 += (*(in +  95) * (*(coeff +  95)));
+  out1 += (*(in +  96) * (*(coeff +  96)));
+  out1 += (*(in +  97) * (*(coeff +  97)));
+  out1 += (*(in +  98) * (*(coeff +  98)));
+  out1 += (*(in +  99) * (*(coeff +  99)));
+  out1 += (*(in + 100) * (*(coeff + 100)));
+   
+  out1 += (*(in + 101) * (*(coeff + 101)));
+  out1 += (*(in + 102) * (*(coeff + 102)));
+  out1 += (*(in + 103) * (*(coeff + 103)));
+  out1 += (*(in + 104) * (*(coeff + 104)));
+  out1 += (*(in + 105) * (*(coeff + 105)));
+  out1 += (*(in + 106) * (*(coeff + 106)));
+  out1 += (*(in + 107) * (*(coeff + 107)));
+  out1 += (*(in + 108) * (*(coeff + 108)));
+  out1 += (*(in + 109) * (*(coeff + 109)));
+  out1 += (*(in + 110) * (*(coeff + 110)));
+   
+  out1 += (*(in + 111) * (*(coeff + 111)));
+  out1 += (*(in + 112) * (*(coeff + 112)));
+  out1 += (*(in + 113) * (*(coeff + 113)));
+  out1 += (*(in + 114) * (*(coeff + 114)));
+  out1 += (*(in + 115) * (*(coeff + 115)));
+  out1 += (*(in + 116) * (*(coeff + 116)));
+  out1 += (*(in + 117) * (*(coeff + 117)));
+  out1 += (*(in + 118) * (*(coeff + 118)));
+  out1 += (*(in + 119) * (*(coeff + 119)));
+  out1 += (*(in + 120) * (*(coeff + 120)));
+   
+  out1 += (*(in + 121) * (*(coeff + 121)));
+  out1 += (*(in + 122) * (*(coeff + 122)));
+  out1 += (*(in + 123) * (*(coeff + 123)));
+  out1 += (*(in + 124) * (*(coeff + 124)));
+  out1 += (*(in + 125) * (*(coeff + 125)));
+  out1 += (*(in + 126) * (*(coeff + 126)));
+  out1 += (*(in + 127) * (*(coeff + 127)));
   
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
 
   return out1;  
 
@@ -1963,82 +2249,163 @@ static float LPF_72 (float *in, float *coeff)
 {
   float out1 = 0;
   
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++); // 16
+  out1 += (*(in +   0) * (*(coeff +   0)));
+  out1 += (*(in +   1) * (*(coeff +   1)));
+  out1 += (*(in +   2) * (*(coeff +   2)));
+  out1 += (*(in +   3) * (*(coeff +   3)));
+  out1 += (*(in +   4) * (*(coeff +   4)));
+  out1 += (*(in +   5) * (*(coeff +   5)));
+  out1 += (*(in +   6) * (*(coeff +   6)));
+  out1 += (*(in +   7) * (*(coeff +   7)));
+  out1 += (*(in +   8) * (*(coeff +   8)));
+  out1 += (*(in +   9) * (*(coeff +   9)));
+  out1 += (*(in +  10) * (*(coeff +  10)));
+   
+  out1 += (*(in +  11) * (*(coeff +  11)));
+  out1 += (*(in +  12) * (*(coeff +  12)));
+  out1 += (*(in +  13) * (*(coeff +  13)));
+  out1 += (*(in +  14) * (*(coeff +  14)));
+  out1 += (*(in +  15) * (*(coeff +  15)));
+  out1 += (*(in +  16) * (*(coeff +  16)));
+  out1 += (*(in +  17) * (*(coeff +  17)));
+  out1 += (*(in +  18) * (*(coeff +  18)));
+  out1 += (*(in +  19) * (*(coeff +  19)));
+  out1 += (*(in +  20) * (*(coeff +  20)));
+   
+  out1 += (*(in +  21) * (*(coeff +  21)));
+  out1 += (*(in +  22) * (*(coeff +  22)));
+  out1 += (*(in +  23) * (*(coeff +  23)));
+  out1 += (*(in +  24) * (*(coeff +  24)));
+  out1 += (*(in +  25) * (*(coeff +  25)));
+  out1 += (*(in +  26) * (*(coeff +  26)));
+  out1 += (*(in +  27) * (*(coeff +  27)));
+  out1 += (*(in +  28) * (*(coeff +  28)));
+  out1 += (*(in +  29) * (*(coeff +  29)));
+  out1 += (*(in +  30) * (*(coeff +  30)));
+   
+  out1 += (*(in +  31) * (*(coeff +  31)));
+  out1 += (*(in +  32) * (*(coeff +  32)));
+  out1 += (*(in +  33) * (*(coeff +  33)));
+  out1 += (*(in +  34) * (*(coeff +  34)));
+  out1 += (*(in +  35) * (*(coeff +  35)));
+  out1 += (*(in +  36) * (*(coeff +  36)));
+  out1 += (*(in +  37) * (*(coeff +  37)));
+  out1 += (*(in +  38) * (*(coeff +  38)));
+  out1 += (*(in +  39) * (*(coeff +  39)));
+  out1 += (*(in +  40) * (*(coeff +  40)));
+   
+  out1 += (*(in +  41) * (*(coeff +  41)));
+  out1 += (*(in +  42) * (*(coeff +  42)));
+  out1 += (*(in +  43) * (*(coeff +  43)));
+  out1 += (*(in +  44) * (*(coeff +  44)));
+  out1 += (*(in +  45) * (*(coeff +  45)));
+  out1 += (*(in +  46) * (*(coeff +  46)));
+  out1 += (*(in +  47) * (*(coeff +  47)));
+  out1 += (*(in +  48) * (*(coeff +  48)));
+  out1 += (*(in +  49) * (*(coeff +  49)));
+  out1 += (*(in +  50) * (*(coeff +  50)));
+   
+  out1 += (*(in +  51) * (*(coeff +  51)));
+  out1 += (*(in +  52) * (*(coeff +  52)));
+  out1 += (*(in +  53) * (*(coeff +  53)));
+  out1 += (*(in +  54) * (*(coeff +  54)));
+  out1 += (*(in +  55) * (*(coeff +  55)));
+  out1 += (*(in +  56) * (*(coeff +  56)));
+  out1 += (*(in +  57) * (*(coeff +  57)));
+  out1 += (*(in +  58) * (*(coeff +  58)));
+  out1 += (*(in +  59) * (*(coeff +  59)));
+  out1 += (*(in +  60) * (*(coeff +  60)));
+   
+  out1 += (*(in +  61) * (*(coeff +  61)));
+  out1 += (*(in +  62) * (*(coeff +  62)));
+  out1 += (*(in +  63) * (*(coeff +  63)));
+  out1 += (*(in +  64) * (*(coeff +  64)));
+  out1 += (*(in +  65) * (*(coeff +  65)));
+  out1 += (*(in +  66) * (*(coeff +  66)));
+  out1 += (*(in +  67) * (*(coeff +  67)));
+  out1 += (*(in +  68) * (*(coeff +  68)));
+  out1 += (*(in +  69) * (*(coeff +  69)));
+  out1 += (*(in +  70) * (*(coeff +  70)));
+   
+  out1 += (*(in +  71) * (*(coeff +  71)));
   
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++); // 32
   
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++); // 48
-  
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++); // 64
-  
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++); // 72
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++); // 16
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++); // 32
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++); // 48
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++); // 64
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++); // 72
   
   return out1;  
 
@@ -2048,40 +2415,78 @@ static float LPF_72 (float *in, float *coeff)
 static float LPF_32 (float *in, float *coeff)
 {
   float out1 = 0;
+
+  out1 += (*(in +   0) * (*(coeff +   0)));
+  out1 += (*(in +   1) * (*(coeff +   1)));
+  out1 += (*(in +   2) * (*(coeff +   2)));
+  out1 += (*(in +   3) * (*(coeff +   3)));
+  out1 += (*(in +   4) * (*(coeff +   4)));
+  out1 += (*(in +   5) * (*(coeff +   5)));
+  out1 += (*(in +   6) * (*(coeff +   6)));
+  out1 += (*(in +   7) * (*(coeff +   7)));
+  out1 += (*(in +   8) * (*(coeff +   8)));
+  out1 += (*(in +   9) * (*(coeff +   9)));
+  out1 += (*(in +  10) * (*(coeff +  10)));
+   
+  out1 += (*(in +  11) * (*(coeff +  11)));
+  out1 += (*(in +  12) * (*(coeff +  12)));
+  out1 += (*(in +  13) * (*(coeff +  13)));
+  out1 += (*(in +  14) * (*(coeff +  14)));
+  out1 += (*(in +  15) * (*(coeff +  15)));
+  out1 += (*(in +  16) * (*(coeff +  16)));
+  out1 += (*(in +  17) * (*(coeff +  17)));
+  out1 += (*(in +  18) * (*(coeff +  18)));
+  out1 += (*(in +  19) * (*(coeff +  19)));
+  out1 += (*(in +  20) * (*(coeff +  20)));
+   
+  out1 += (*(in +  21) * (*(coeff +  21)));
+  out1 += (*(in +  22) * (*(coeff +  22)));
+  out1 += (*(in +  23) * (*(coeff +  23)));
+  out1 += (*(in +  24) * (*(coeff +  24)));
+  out1 += (*(in +  25) * (*(coeff +  25)));
+  out1 += (*(in +  26) * (*(coeff +  26)));
+  out1 += (*(in +  27) * (*(coeff +  27)));
+  out1 += (*(in +  28) * (*(coeff +  28)));
+  out1 += (*(in +  29) * (*(coeff +  29)));
+  out1 += (*(in +  30) * (*(coeff +  30)));
+   
+  out1 += (*(in +  31) * (*(coeff +  31)));
+
+
   
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++); // 16
-  
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++);
-  out1 += (*in++) * (*coeff++); // 32
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++); // 16
+//  
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++);
+//  out1 += (*in++) * (*coeff++); // 32
   
   return out1;  
 
