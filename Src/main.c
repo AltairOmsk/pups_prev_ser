@@ -1010,8 +1010,11 @@ void StartDefaultTask(void const * argument)
   set_TXRX_mode (RX);
 
   //---   Запуск приемника   ---------------------------------------------------
-      R.DDS_RX.Fdiskr = 48828;
+      R.DDS_RX.Fdiskr = 48828;  // Магнитный канал
       //R.DDS_RX.Freq = 8000;
+      
+      R.DDS_GA.Fdiskr = 48828;  // Гидроакустический канал
+      R.DDS_GA.Freq = 17000;
       
       HAL_I2SEx_TransmitReceive_DMA(&hi2s2, (uint16_t*)R.CodecTxData, (uint16_t*)R.CodecRxData, CODEC_BUF_SIZE);
       __HAL_DMA_DISABLE_IT(&hdma_spi2_tx, DMA_IT_TC);
@@ -1019,7 +1022,6 @@ void StartDefaultTask(void const * argument)
       
       //set_RX_Gain_codec();
   //----------------------------------------------------------------------------
-
   
   //---   Запуск передатчика ---------------------------------------------------
       R.DDS_TX.Fdiskr = 48828UL;
@@ -1031,6 +1033,8 @@ void StartDefaultTask(void const * argument)
       Возможно нужно будет сделать выход MUTE для управления усилителем.
       */
   //----------------------------------------------------------------------------
+      
+
 
  
 //---   Bluetooth INIT   -------------------------------------------------------

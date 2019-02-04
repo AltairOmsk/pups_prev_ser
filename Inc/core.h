@@ -32,6 +32,7 @@ HAL_StatusTypeDef My_HAL_TIM_DMABurst_WriteStart(TIM_HandleTypeDef *htim, uint32
                                               uint32_t* BurstBuffer, uint32_t  BurstLength, uint32_t Size_All_DMA_transfer);
 HAL_StatusTypeDef My_HAL_TIM_PWM_Start(TIM_HandleTypeDef *htim, uint32_t Channel);
 int16_t HP_Filter (int16_t In);                                                 // ФВЧ для удаления постоянки
+int16_t HP_Filter_GA (int16_t In);                                                 // ФВЧ для удаления постоянки
 uint8_t scan_button (void);  
 uint8_t scan_button_freq (void);
 

@@ -48,6 +48,8 @@ void     codec_IN1R_to_ADC              (void);                                 
 void left_DAC_mute (void);
 void right_DAC_mute (void);
 void DAC_UNmute (void);
+void codec_RX_mode (void);
+void codec_TX_mode (void);
 
 void beep_R (uint16_t Freq, int16_t Vol, uint16_t Duration);
 

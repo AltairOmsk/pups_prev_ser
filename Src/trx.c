@@ -563,7 +563,15 @@ void set_DDS_freq (uint32_t Freq){
 void set_TXRX_mode (TXRX_MODE_e TXRX_Mode) {
 
   switch (TXRX_Mode){
-    case RX:                                                                    // Включить прием
+    case RX:
+      /*
+      - Правый канал АЦП скоммутировать на IN1_R (магнитную антенну)
+      - Левый канал скоммутировать на IN1_L (ГА антенну)
+      
+      */
+      codec_RX_mode();
+      
+      // Включить прием
       //off_HW_TX();
       //on_HW_RX();
       //codec_IN1R_to_ADC();
@@ -945,12 +953,12 @@ uint32_t Out_u32;
   // GA ------------------------------------------------------------------------
   R.GA_SSB_Out_F = 0;                                                           // Подготовка
 
-  R.Tmp_i32 = HP_Filter(In & 0xFFFF);                                           // Для явной конверсии в int32. Только младшие биты - левый канал
+  R.Tmp_i32 = HP_Filter_GA(In & 0xFFFF);                                           // Для явной конверсии в int32. Только младшие биты - левый канал
   
   dds16(&R.DDS_GA);                                                             // Генерируем два отсчета I и Q
 
-  R.GA_Buf_LPF_48k_I[R.GA_Buf_LPF_48k_idx + 66] = R.DDS_GA.I * R.Tmp_i32 * 15;  // Первый смеситель. Домножение - компенсация потерь в дециматоре
-  R.GA_Buf_LPF_48k_Q[R.GA_Buf_LPF_48k_idx + 66] = R.DDS_GA.Q * R.Tmp_i32 * 15;
+  R.GA_Buf_LPF_48k_I[R.Buf_LPF_48k_idx + 66] = R.DDS_GA.I * R.Tmp_i32 * 15;  // Первый смеситель. Домножение - компенсация потерь в дециматоре
+  R.GA_Buf_LPF_48k_Q[R.Buf_LPF_48k_idx + 66] = R.DDS_GA.Q * R.Tmp_i32 * 15;
   
   R.GA_SSB_Out_F = R.GA_Buf_48k_Out[R.GA_Buf_LPF_48k_idx];                      // Выходной отсчет из буфера интерполятора
   //============================================================================
@@ -1021,7 +1029,7 @@ uint32_t Out_u32;
 
 
   // GA ------------------------------------------------------------------------  
-  R.GA_Buf_LPF_48k_idx = 0;                                                        // Здесь начинается домен 8138 Гц. Подготовка к новому циклу.
+  //R.GA_Buf_LPF_48k_idx = 0;                                                        // Здесь начинается домен 8138 Гц. Подготовка к новому циклу.
 
   R.GA_Buf_LPF_8k_I[127] = LPF_72 (R.GA_Buf_LPF_48k_I, LPF72_coeff_Decimation);       // Фильтр дециматор в конец поворачивающего фильтра
   R.GA_Buf_LPF_8k_Q[127] = LPF_72 (R.GA_Buf_LPF_48k_Q, LPF72_coeff_Decimation);
@@ -1034,9 +1042,12 @@ uint32_t Out_u32;
   shift_buf_128(R.GA_Buf_LPF_8k_I);                                                // Сдвигаем буфера - готовим к новому циклу
   shift_buf_128(R.GA_Buf_LPF_8k_Q);
   
+  R.GA_USB_On = 1;
   if (R.GA_USB_On) R.GA_Buf_BPF_8k[127] = (R.TmpI - R.TmpQ) ;                         // Формируем выходной USB низкочастотный сигнал в последний элемент буфера полосового филльтра
   else R.GA_Buf_BPF_8k[127] = (R.TmpI + R.TmpQ) ;                                  // LSB
   
+  
+  R.GA_RXBW = RXBW_WIDE;
   switch (R.GA_RXBW){                                                              // Применяем полосовой фильтр и укладываем в интерполятор новый отсчет
   case RXBW_NARROW:                                                     
     R.GA_Buf_48k_Out_Work[11] = LPF_128 (R.GA_Buf_BPF_8k, LPF128_coeff_BPF_Tone_N);   // Узкая полоса 400 Гц
@@ -1070,7 +1081,7 @@ uint32_t Out_u32;
 
   //return R.SSB_Out_F;
 
-  int32_t Tmp = (int16_t)R.SSB_Out_F;                                           // Явно выход превращаем в int16
+  int32_t Tmp = (int16_t)R.GA_SSB_Out_F;                                           // Явно выход превращаем в int16
 
   Out_u32 = (Tmp << 16);                                                        // Сдвигаем в правый канал
   

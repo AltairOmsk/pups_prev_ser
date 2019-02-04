@@ -168,7 +168,29 @@ void     CODEC_Init     (void) {
     
 }
 
-
+void codec_RX_mode (void){
+    I2C_Write (0x00, 0x01);             // Select Page 1
+    I2C_Write (0x34, 0x40);             // IN1L is routed to Left MICPGA with 10k resistance
+    I2C_Write (0x36, 0x40);             // CM is routed to Left MICPGA via CM1L with 10k resistance  
+    I2C_Write (0x37, 0x40);             // IN1R is routed to Right MICPGA with 10k resistance
+    I2C_Write (0x39, 0x40);             // CM is routed to Right MICPGA via CM1R with 10k resistance 
+    I2C_Write (0x3b, 0x50);             // Unmute Left MICPGA, Gain 40dB
+    I2C_Write (0x3c, 0x50);             // Unmute Right MICPGA, Gain 30dB
+    
+    I2C_Write (0x00, 0x00);             // Select Page 0      
+    I2C_Write (0x3f, 0xd6);             // Power up the Left and Right DAC Channels with route the Left Audio digital data to
+                                        // Left Channel DAC and Right Audio digital data to Right Channel DAC
+    I2C_Write (0x40, 0x00);             // Unmute the DAC digital volume control
+    I2C_Write (0x41, 0x00);             // Left DAC 0011 0000: Digital Volume Control = 0dB
+    I2C_Write (0x42, 0x00);             // Right DAC 0011 0000: Digital Volume Control = 0dB
+  
+    
+    I2C_Write (0x51, 0xc0);             // Power up Left and Right ADC Channels
+    I2C_Write (0x52, 0x00);             // Unmute Left and Right ADC Digital Volume Control.
+//    I2C_Write (0x53, 0x28);             // Left ADC Channel Volume = 20.0dB
+//    I2C_Write (0x54, 0x28);             // Right ADC Channel Volume = 20.0dB
+};
+void codec_TX_mode (void){};
 
 void left_DAC_mute (void){
 I2C_Write (0x00, 0x00);                                                         // Select Page 0
