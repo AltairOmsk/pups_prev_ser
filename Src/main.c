@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -127,6 +127,9 @@ UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_usart1_tx;
 
+DMA_HandleTypeDef hdma_memtomem_dma2_stream1;
+DMA_HandleTypeDef hdma_memtomem_dma2_stream2;
+DMA_HandleTypeDef hdma_memtomem_dma2_stream4;
 osThreadId defaultTaskHandle;
 osThreadId UHF_taskHandle;
 osThreadId USB_taskHandle;
@@ -344,10 +347,37 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  __PWR_ON_LOCK_ON;
+  
+//  R.Buf_LPF_8k_I[10] = 1;
+//  
+//  uint32_t Src[10], Dst[10];
+//  for (uint8_t i=0;i<10;i++){
+//    Src[i]=0;
+//    Dst[i]=0;
+//  }
+//  
+//  Src[5] = 255;
+//  
+//  while(1){
+//      __HAL_DMA_DISABLE(&hdma_memtomem_dma2_stream1);
+//      HAL_DMA_Start(&hdma_memtomem_dma2_stream1, (uint32_t)Src+1, (uint32_t)Src, 9);
+//      
+//      //HAL_Delay(100);
+//      __no_operation();
+//      __no_operation();
+//      __no_operation();
+//      __no_operation();
+//  
+//  }
+  
+  
+  
+  
   RC_start_Init();                                                              // Инициализация переменных для дистанционного управления
   squelch_init(&R.RXSQL);                                                       // Инициализация коэффициентов шумоподавителя
   restore_settings();                                                           // Восстановление сохраненных настроек из батарейного домена        
-__PWR_ON_LOCK_ON;
+
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -689,7 +719,7 @@ static void MX_SDIO_SD_Init(void)
   hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
   hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 60;
+  hsd.Init.ClockDiv = 118;
 
 }
 
@@ -776,12 +806,73 @@ static void MX_USART3_UART_Init(void)
 
 /** 
   * Enable DMA controller clock
+  * Configure DMA for memory to memory transfers
+  *   hdma_memtomem_dma2_stream1
+  *   hdma_memtomem_dma2_stream2
+  *   hdma_memtomem_dma2_stream4
   */
 static void MX_DMA_Init(void) 
 {
   /* DMA controller clock enable */
   __HAL_RCC_DMA1_CLK_ENABLE();
   __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* Configure DMA request hdma_memtomem_dma2_stream1 on DMA2_Stream1 */
+  hdma_memtomem_dma2_stream1.Instance = DMA2_Stream1;
+  hdma_memtomem_dma2_stream1.Init.Channel = DMA_CHANNEL_0;
+  hdma_memtomem_dma2_stream1.Init.Direction = DMA_MEMORY_TO_MEMORY;
+  hdma_memtomem_dma2_stream1.Init.PeriphInc = DMA_PINC_ENABLE;
+  hdma_memtomem_dma2_stream1.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_memtomem_dma2_stream1.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+  hdma_memtomem_dma2_stream1.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+  hdma_memtomem_dma2_stream1.Init.Mode = DMA_NORMAL;
+  hdma_memtomem_dma2_stream1.Init.Priority = DMA_PRIORITY_HIGH;
+  hdma_memtomem_dma2_stream1.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+  hdma_memtomem_dma2_stream1.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma_memtomem_dma2_stream1.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_memtomem_dma2_stream1.Init.PeriphBurst = DMA_PBURST_SINGLE;
+  if (HAL_DMA_Init(&hdma_memtomem_dma2_stream1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  /* Configure DMA request hdma_memtomem_dma2_stream2 on DMA2_Stream2 */
+  hdma_memtomem_dma2_stream2.Instance = DMA2_Stream2;
+  hdma_memtomem_dma2_stream2.Init.Channel = DMA_CHANNEL_0;
+  hdma_memtomem_dma2_stream2.Init.Direction = DMA_MEMORY_TO_MEMORY;
+  hdma_memtomem_dma2_stream2.Init.PeriphInc = DMA_PINC_ENABLE;
+  hdma_memtomem_dma2_stream2.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_memtomem_dma2_stream2.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+  hdma_memtomem_dma2_stream2.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+  hdma_memtomem_dma2_stream2.Init.Mode = DMA_NORMAL;
+  hdma_memtomem_dma2_stream2.Init.Priority = DMA_PRIORITY_HIGH;
+  hdma_memtomem_dma2_stream2.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+  hdma_memtomem_dma2_stream2.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma_memtomem_dma2_stream2.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_memtomem_dma2_stream2.Init.PeriphBurst = DMA_PBURST_SINGLE;
+  if (HAL_DMA_Init(&hdma_memtomem_dma2_stream2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  /* Configure DMA request hdma_memtomem_dma2_stream4 on DMA2_Stream4 */
+  hdma_memtomem_dma2_stream4.Instance = DMA2_Stream4;
+  hdma_memtomem_dma2_stream4.Init.Channel = DMA_CHANNEL_0;
+  hdma_memtomem_dma2_stream4.Init.Direction = DMA_MEMORY_TO_MEMORY;
+  hdma_memtomem_dma2_stream4.Init.PeriphInc = DMA_PINC_ENABLE;
+  hdma_memtomem_dma2_stream4.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_memtomem_dma2_stream4.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+  hdma_memtomem_dma2_stream4.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+  hdma_memtomem_dma2_stream4.Init.Mode = DMA_NORMAL;
+  hdma_memtomem_dma2_stream4.Init.Priority = DMA_PRIORITY_LOW;
+  hdma_memtomem_dma2_stream4.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+  hdma_memtomem_dma2_stream4.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma_memtomem_dma2_stream4.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_memtomem_dma2_stream4.Init.PeriphBurst = DMA_PBURST_SINGLE;
+  if (HAL_DMA_Init(&hdma_memtomem_dma2_stream4) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
 
   /* DMA interrupt init */
   /* DMA1_Stream3_IRQn interrupt configuration */
@@ -900,9 +991,8 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void const * argument)
 {
   /* init code for FATFS */
-  //MX_FATFS_Init();
-  
-  
+  MX_FATFS_Init();
+
   /* USER CODE BEGIN 5 */
   //BSP_SD_Init(); //!!!!!!!!!!!!!!!!!!!!!!!!! Вызывать перед MX_FATFS_Init();
 

@@ -323,6 +323,9 @@ extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern const int8_t test_tone_8bit_pcm[31338];
 extern UNIQUE_ID DevID;
+extern DMA_HandleTypeDef hdma_memtomem_dma2_stream1;
+extern DMA_HandleTypeDef hdma_memtomem_dma2_stream2;
+extern DMA_HandleTypeDef hdma_memtomem_dma2_stream4;
 
 //******************************************************************************
 // Секция прототипов глобальных функций
