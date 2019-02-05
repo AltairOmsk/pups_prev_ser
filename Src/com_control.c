@@ -54,7 +54,7 @@ void RC_start_Init (void){
   R.Parott_En                   = 0;                                            // Попугай выключен
   R.Test_tone_freq              = 1000;                                         // Тестовый тон звуковая частота без учета несущей
   R.TX_pwr                      = 100;                                          // Выходная мощность передатчика 0-100%
-  R.AGC.Enable                  = 0;                                            // АРУ soft rx по умолчанию 1-включена 0-выключена
+  //R.AGC.Enable                  = 0;                                            // АРУ soft rx по умолчанию 1-включена 0-выключена
   R.TXAGC.Enable                = 1;                                            // АРУ по умолчанию 1-включена 0-выключена
   R.RXAGC.Enable                = 0;                                            // АРУ по умолчанию 1-включена 0-выключена
   R.Tone_Puls                   = 0;                                            // Тон по умолчанию непрерывный
@@ -135,7 +135,7 @@ void USART1_read_command (void){
 char Tmp_buf[12];
 char *Ptr;
 uint8_t i, ii;
-int32_t Tmp32;
+int32_t Tmp32, Tmp32_2;
 
 
   //----------------------------------------------------------------------------
@@ -453,6 +453,232 @@ int32_t Tmp32;
     HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
     
   }
+  
+  
+  
+  //===   AGC   ================================================================
+  Ptr=strstr(R.U1.Buf, "AT+AGCSETL=");                                          // AT+AGCSETL=
+  if (Ptr){
+    Ptr +=strlen("AT+AGCSETL=");
+    ii=0; for (i=0;i<12;i++) { Tmp_buf[i]=0; } 
+    while (*Ptr != ','){                                                        // Имя параметра
+        if (ii>4) { break; }
+        Tmp_buf[ii]=*Ptr;   Ptr++;   ii++;
+        Tmp_buf[3]=0;
+    }
+    Ptr++;                                                                      // Перескакиваем запятую
+    Tmp32 = atoi(Tmp_buf);                                                      // Получили номер имени параметра
+
+    
+    ii=0; for (i=0;i<12;i++) { Tmp_buf[i]=0; }
+    while (*Ptr != '\r'){                                                       // Значение параметра
+        if (ii>5) { break; }
+        Tmp_buf[ii]=*Ptr;   Ptr++;   ii++;
+        Tmp_buf[4]=0;
+    }
+    Tmp32_2 = atoi(Tmp_buf);                                                    // Получение значения параметра
+    
+    switch (Tmp32){
+      case 0:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 1))   R.AGC_L.Enable      = Tmp32_2;  // Enable
+        else goto EXIT;
+      break;
+      
+      case 1:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 7))   R.AGC_L.TargetLevel = Tmp32_2;  // TargetLevel
+        else goto EXIT;
+      break;
+      
+      case 2:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 31)) R.AGC_L.AttackTime  = Tmp32_2;   // AttackTime
+        else goto EXIT;
+      break;
+      
+      case 3:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 31)) R.AGC_L.DecayTime   = Tmp32_2;   // DecayTime
+        else goto EXIT;
+      break;
+      
+      case 4:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 31)) R.AGC_L.NoiseThreshold=Tmp32_2;  // NoiseThreshold
+        else goto EXIT;
+      break;
+      
+      case 5:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 116)) R.AGC_L.MAX_PGAgain  = Tmp32_2; // MAX_PGAgain
+        else goto EXIT;
+      break;
+      
+      case 6:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 3))   R.AGC_L.Hysteresis   = Tmp32_2; // Hysteresis
+        else goto EXIT;
+      break;
+      
+      case 7:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 31)) R.AGC_L.NoiseDebounce =Tmp32_2;  // NoiseDebounce
+        else goto EXIT;
+      break;
+      
+      case 8:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 15)) R.AGC_L.SignalDebounce =Tmp32_2; // SignalDebounce
+        else goto EXIT;
+      break;
+      
+      default:                                                                  // Параметр вне допустимых границ
+        sprintf(R.TmpStr, "ERROR: Parameter number is wrong (1-8)\r\n");
+        HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+        goto EXIT;
+      break;
+    }
+    
+    load_AGC_L_settings();
+    
+    sprintf(R.TmpStr, "+AGC_L:\r\n0.Enable               = %d\r\n", R.AGC_L.Enable);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "1.Target Level         = %d\r\n", R.AGC_L.TargetLevel);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "2.Attack Time          = %d\r\n", R.AGC_L.AttackTime);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "3.Decay Time           = %d\r\n", R.AGC_L.DecayTime);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "4.Noise Threshold      = %d\r\n", R.AGC_L.NoiseThreshold);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "5.Max PGA gain         = %d dB\r\n", R.AGC_L.MAX_PGAgain/2);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "6.Hysteresis           = %d\r\n", R.AGC_L.Hysteresis);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "7.Noise debounce time  = %d\r\n", R.AGC_L.NoiseDebounce);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "8.Signal debounce time = %d\r\n", R.AGC_L.SignalDebounce);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+  }
+  
+  
+  Ptr=strstr(R.U1.Buf, "AT+AGCSETR=");                                          // AT+AGCSETR=
+  if (Ptr){
+    Ptr +=strlen("AT+AGCSETR=");
+    ii=0; for (i=0;i<12;i++) { Tmp_buf[i]=0; } 
+    while (*Ptr != ','){                                                        // Имя параметра
+        if (ii>4) { break; }
+        Tmp_buf[ii]=*Ptr;   Ptr++;   ii++;
+        Tmp_buf[3]=0;
+    }
+    Ptr++;                                                                      // Перескакиваем запятую
+    Tmp32 = atoi(Tmp_buf);                                                      // Получили номер имени параметра
+
+    
+    ii=0; for (i=0;i<12;i++) { Tmp_buf[i]=0; }
+    while (*Ptr != '\r'){                                                       // Значение параметра
+        if (ii>5) { break; }
+        Tmp_buf[ii]=*Ptr;   Ptr++;   ii++;
+        Tmp_buf[4]=0;
+    }
+    Tmp32_2 = atoi(Tmp_buf);                                                    // Получение значения параметра
+    
+    switch (Tmp32){
+      case 0:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 1))   R.AGC_R.Enable      = Tmp32_2;  // Enable
+        else goto EXIT;
+      break;
+      
+      case 1:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 7))   R.AGC_R.TargetLevel = Tmp32_2;  // TargetLevel
+        else goto EXIT;
+      break;
+      
+      case 2:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 31)) R.AGC_R.AttackTime  = Tmp32_2;   // AttackTime
+        else goto EXIT;
+      break;
+      
+      case 3:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 31)) R.AGC_R.DecayTime   = Tmp32_2;   // DecayTime
+        else goto EXIT;
+      break;
+      
+      case 4:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 31)) R.AGC_R.NoiseThreshold=Tmp32_2;  // NoiseThreshold
+        else goto EXIT;
+      break;
+      
+      case 5:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 116)) R.AGC_R.MAX_PGAgain  = Tmp32_2; // MAX_PGAgain
+        else goto EXIT;
+      break;
+      
+      case 6:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 3))   R.AGC_R.Hysteresis   = Tmp32_2; // Hysteresis
+        else goto EXIT;
+      break;
+      
+      case 7:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 31)) R.AGC_R.NoiseDebounce =Tmp32_2;  // NoiseDebounce
+        else goto EXIT;
+      break;
+      
+      case 8:
+        if ((Tmp32_2 >= 0) && (Tmp32_2 <= 15)) R.AGC_R.SignalDebounce =Tmp32_2; // SignalDebounce
+        else goto EXIT;
+      break;
+      
+      default:                                                                  // Параметр вне допустимых границ
+        sprintf(R.TmpStr, "ERROR: Parameter number is wrong (1-8)\r\n");
+        HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+        goto EXIT;
+      break;
+    }
+    
+    load_AGC_R_settings();
+    
+    sprintf(R.TmpStr, "+AGC_R:\r\nEnable               = %d\r\n", R.AGC_R.Enable);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "Target Level         = %d\r\n", R.AGC_R.TargetLevel);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "Attack Time          = %d\r\n", R.AGC_R.AttackTime);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "Decay Time           = %d\r\n", R.AGC_R.DecayTime);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "Noise Threshold      = %d\r\n", R.AGC_R.NoiseThreshold);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "Max PGA gain         = %2f dB\r\n", R.AGC_R.MAX_PGAgain);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "Hysteresis           = %d\r\n", R.AGC_R.Hysteresis);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "Noise debounce time  = %d\r\n", R.AGC_R.NoiseDebounce);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    sprintf(R.TmpStr, "Signal debounce time = %d\r\n", R.AGC_R.SignalDebounce);
+    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+    
+    
+    
+  }
+  
+  
+  //============================================================================
+  
+  
+  
+  
+  
+  
+  
   
   
   //----------------------------------------------------------------------------
@@ -859,7 +1085,9 @@ int32_t Tmp32;
   //----------------------------------------------------------------------------
   
   save_settings();                                                              // Сохранение настроек в батарейный домен
+
   
+EXIT:
   for (ii=0;ii<255;ii++) R.U1.Buf[ii]=0;                                        // Зачитска буфера перед выходом
   
 }
@@ -935,8 +1163,8 @@ void Status_Send (void){
     HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
     
     // AGC status
-    (R.AGC.Enable == 1) ? (sprintf(R.TmpStr, "RX AGC ENABLE\r\n")) : (sprintf(R.TmpStr, "RX AGC DISABLE\r\n"));
-    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
+//    (R.AGC.Enable == 1) ? (sprintf(R.TmpStr, "RX AGC ENABLE\r\n")) : (sprintf(R.TmpStr, "RX AGC DISABLE\r\n"));
+//    HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
     (R.TXAGC.Enable == 1) ? (sprintf(R.TmpStr, "TX AGC ENABLE\r\n")) : (sprintf(R.TmpStr, "TX AGC DISABLE\r\n"));
     HAL_UART_Transmit(&huart1, (uint8_t*)R.TmpStr, strlen(R.TmpStr), 500);
     
@@ -1057,7 +1285,7 @@ uint32_t ToSave;
   
   //--- FLAGS   ----------------------------------------------------------------
   ToSave  = 0;
-  ToSave |= (R.AGC.Enable       << 0);
+  //ToSave |= (R.AGC.Enable       << 0);
   ToSave |= (R.EqRx_En          << 1);
   ToSave |= (R.EqTx_En          << 2);
   ToSave |= (R.FlashLogEn       << 3);
@@ -1109,7 +1337,7 @@ uint32_t In;
    
 //---   FLAGS   ----------------------------------------------------------------
   In = HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR19);
-  R.AGC.Enable          = ((In & (1 << 0)) != 0) ? (1) : (0);
+  //R.AGC.Enable          = ((In & (1 << 0)) != 0) ? (1) : (0);
   R.EqRx_En             = ((In & (1 << 1)) != 0) ? (1) : (0);
   R.EqTx_En             = ((In & (1 << 2)) != 0) ? (1) : (0);
   R.FlashLogEn          = ((In & (1 << 3)) != 0) ? (1) : (0);   

@@ -633,7 +633,7 @@ void set_TXRX_mode (TXRX_MODE_e TXRX_Mode) {
       //off_HW_RX();
       //on_HW_TX();
       
-      __RX_PA_OFF;
+      //__RX_PA_OFF;                                                            // На тоне усилитель не отключаем
       __REL_RX_TUNE0_OFF;
       __REL_RX_TUNE1_OFF;
       __REL_RX_SHORT_ON;
@@ -1012,7 +1012,7 @@ uint32_t Out_u32;
   }
   //------------------------------------------------------------------------
   
-  if (R.AGC.Enable) AGC (&R.Buf_48k_Out_Work[11]);                              // Применяем АРУ, если включена
+  //if (R.AGC.Enable) AGC (&R.Buf_48k_Out_Work[11]);                              // Применяем АРУ, если включена
   
   R.Buf_48k_Out_Work[11] = squelch_N (R.Buf_48k_Out_Work[11], &R.RXSQL);          // Шумоподавитель
   
@@ -1075,13 +1075,13 @@ uint32_t Out_u32;
   
   }// Конец домена 8 кГц
     
-  //__LED2_OFF;
   
   if (R.RXBW == RXBW_BYPASS) R.SSB_Out_F = In;
 
   //return R.SSB_Out_F;
 
-  int32_t Tmp = (int16_t)R.GA_SSB_Out_F;                                           // Явно выход превращаем в int16
+  int32_t Tmp  = (int16_t)R.GA_SSB_Out_F;                                           // Явно выход превращаем в int16
+          Tmp += (int16_t)R.SSB_Out_F;
 
   Out_u32 = (Tmp << 16);                                                        // Сдвигаем в правый канал
   
@@ -2870,7 +2870,7 @@ static uint16_t PushCnt, ReleaseCnt;
           __no_operation();
         }
         else {
-            //------------------------------------------------------------------ Genersl PTT routine
+            //------------------------------------------------------------------ General PTT routine
           __LED2_ON;
           R.TXRX_Mode = TX;
           set_TXRX_mode(R.TXRX_Mode);

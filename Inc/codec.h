@@ -51,6 +51,9 @@ void DAC_UNmute (void);
 void codec_RX_mode (void);
 void codec_TX_mode (void);
 
+void load_AGC_L_settings (void);                                                // Загрузить в кодек установки АРУ левого канала
+void load_AGC_R_settings (void);                                                // Загрузить в кодек установки АРУ правого канала
+
 void beep_R (uint16_t Freq, int16_t Vol, uint16_t Duration);
 
 

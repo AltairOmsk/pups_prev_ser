@@ -110,10 +110,6 @@ typedef struct {                                                                
 } UART_t;
 
 
-typedef struct {                                                                // Контекст системы АРУ
-  uint8_t  Enable;
-} AGC_t;
-
 typedef struct {                                                                // Контекст компрессора 
   uint8_t  Enable;
 } DRC_t;
@@ -138,6 +134,19 @@ typedef enum {                                                                  
   REC,
   PLAY
 } PAROTT_STATE_e;
+
+
+typedef struct {
+  uint8_t               Enable;
+  uint8_t               TargetLevel;                                            // Параметры АРУ кодека.
+  uint8_t               AttackTime;
+  uint8_t               DecayTime;
+  uint8_t               NoiseThreshold;
+  uint8_t               MAX_PGAgain;
+  uint8_t               Hysteresis;
+  uint8_t               NoiseDebounce;
+  uint8_t               SignalDebounce;
+} AGC_t;
 
 typedef struct
 {
@@ -176,6 +185,10 @@ typedef struct
   DDS16_t               DDS_TX;                                                 // Гетеродин несущей второго преобразования передачи
   DDS16_t               DDS_GA;                                                 // Гетеродин несущей гидроакустического канала
   DDS16_t               DDS_AUX;                                                // Вспомогательный генератор для генерации всяких тонов
+  
+  AGC_t                 AGC_L;                                                  // Установки аппаратного АРУ кодека 
+  AGC_t                 AGC_R;
+  
   
   
   //---   SSB приемник  --------------------------------------------------------
@@ -233,7 +246,7 @@ typedef struct
   
   //----------------------------------------------------------------------------
   
-  AGC_t AGC;                                                                    // RX AGC SSB
+  //AGC_t AGC;                                                                    // RX AGC SSB
   AGC_t TXAGC;                                                                  // TX AGC Microphone
   AGC_t RXAGC;
   DRC_t TXDRC;

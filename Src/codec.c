@@ -175,14 +175,14 @@ void codec_RX_mode (void){
     I2C_Write (0x37, 0x40);             // IN1R is routed to Right MICPGA with 10k resistance
     I2C_Write (0x39, 0x40);             // CM is routed to Right MICPGA via CM1R with 10k resistance 
     I2C_Write (0x3b, 0x50);             // Unmute Left MICPGA, Gain 40dB
-    I2C_Write (0x3c, 0x50);             // Unmute Right MICPGA, Gain 30dB
+    I2C_Write (0x3c, 0x50);             // Unmute Right MICPGA, Gain 40dB
     
-    I2C_Write (0x00, 0x00);             // Select Page 0      
-    I2C_Write (0x3f, 0xd6);             // Power up the Left and Right DAC Channels with route the Left Audio digital data to
-                                        // Left Channel DAC and Right Audio digital data to Right Channel DAC
-    I2C_Write (0x40, 0x00);             // Unmute the DAC digital volume control
-    I2C_Write (0x41, 0x00);             // Left DAC 0011 0000: Digital Volume Control = 0dB
-    I2C_Write (0x42, 0x00);             // Right DAC 0011 0000: Digital Volume Control = 0dB
+//    I2C_Write (0x00, 0x00);             // Select Page 0      
+//    I2C_Write (0x3f, 0xd6);             // Power up the Left and Right DAC Channels with route the Left Audio digital data to
+//                                        // Left Channel DAC and Right Audio digital data to Right Channel DAC
+//    I2C_Write (0x40, 0x00);             // Unmute the DAC digital volume control
+//    I2C_Write (0x41, 0x00);             // Left DAC 0011 0000: Digital Volume Control = 0dB
+//    I2C_Write (0x42, 0x00);             // Right DAC 0011 0000: Digital Volume Control = 0dB
   
     
     I2C_Write (0x51, 0xc0);             // Power up Left and Right ADC Channels
@@ -191,6 +191,100 @@ void codec_RX_mode (void){
 //    I2C_Write (0x54, 0x28);             // Right ADC Channel Volume = 20.0dB
 };
 void codec_TX_mode (void){};
+
+
+
+
+
+//******************************************************************************
+//   Загрузить в кодек установки АРУ левого канала
+//******************************************************************************
+void load_AGC_L_settings (void){   
+uint8_t Tmp;  
+  I2C_Write (0x00, 0x00);                                                       // Select Page 0
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_L.Enable         << 7;
+  Tmp |= R.AGC_L.TargetLevel    << 4;
+  I2C_Write (86, Tmp);                                                          // Загрузить 86 регистр
+  
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_L.Hysteresis     << 6;
+  Tmp |= R.AGC_L.NoiseThreshold << 1;
+  I2C_Write (87, Tmp);                                                          // Загрузить 87 регистр  
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_L.MAX_PGAgain    << 0;
+  I2C_Write (88, Tmp);                                                          // Загрузить 88 регистр
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_L.AttackTime     << 3;
+  I2C_Write (89, Tmp);                                                          // Загрузить 89 регистр
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_L.DecayTime      << 3;
+  I2C_Write (90, Tmp);                                                          // Загрузить 90 регистр
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_L.NoiseDebounce  << 0;
+  I2C_Write (91, Tmp);                                                          // Загрузить 91 регистр
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_L.SignalDebounce  << 0;
+  I2C_Write (92, Tmp);                                                          // Загрузить 92 регистр
+};
+
+
+//******************************************************************************
+//   Загрузить в кодек установки АРУ правого канала
+//******************************************************************************
+void load_AGC_R_settings (void){                                                
+uint8_t Tmp;  
+  I2C_Write (0x00, 0x00);                                                       // Select Page 0
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_R.Enable         << 7;
+  Tmp |= R.AGC_R.TargetLevel    << 4;
+  I2C_Write (94, Tmp);                                                          // Загрузить 94 регистр
+  
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_R.Hysteresis     << 6;
+  Tmp |= R.AGC_R.NoiseThreshold << 1;
+  I2C_Write (95, Tmp);                                                          // Загрузить 95 регистр  
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_R.MAX_PGAgain    << 0;
+  I2C_Write (96, Tmp);                                                          // Загрузить 96 регистр
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_R.AttackTime     << 3;
+  I2C_Write (97, Tmp);                                                          // Загрузить 97 регистр
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_R.DecayTime      << 3;
+  I2C_Write (98, Tmp);                                                          // Загрузить 98 регистр
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_R.NoiseDebounce  << 0;
+  I2C_Write (99, Tmp);                                                          // Загрузить 99 регистр
+  
+  Tmp  = 0;
+  Tmp |= R.AGC_R.SignalDebounce  << 0;
+  I2C_Write (100, Tmp);                                                         // Загрузить 100 регистр
+};
+
+
+
+
+
+
+
+
+
+
+
 
 void left_DAC_mute (void){
 I2C_Write (0x00, 0x00);                                                         // Select Page 0
