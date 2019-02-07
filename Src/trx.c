@@ -397,6 +397,8 @@ static int16_t rx_rec_parott            (int16_t In);
 static int16_t rx_play_parott           (int16_t In);
 static int16_t fft_load                 (int16_t In);
 
+static uint32_t create_RX_out (uint8_t Ch, float MA_Ch, float GA_Ch);           // Формирование выходного сигнала приемника из двух входов
+
 static float   sql_tx                   (uint8_t *Enable);                      // Генерация сигнала но открытие шумоподавителя
 
 
@@ -1078,16 +1080,25 @@ uint32_t Out_u32;
   
   if (R.RXBW == RXBW_BYPASS) R.SSB_Out_F = In;
 
-  //return R.SSB_Out_F;
-
-  int32_t Tmp  = (int16_t)R.GA_SSB_Out_F;                                           // Явно выход превращаем в int16
-          Tmp += (int16_t)R.SSB_Out_F;
-
-  Out_u32 = (Tmp << 16);                                                        // Сдвигаем в правый канал
-  
+//  //return R.SSB_Out_F;
+//
+//  int32_t Tmp  = (int16_t)R.GA_SSB_Out_F;                                           // Явно выход превращаем в int16
+//          Tmp += (int16_t)R.SSB_Out_F;
+//
+//  Out_u32 = (Tmp << 16);                                                        // Сдвигаем в правый канал
+//  
             __LED2_OFF;
-  
-  return Out_u32;  
+//            
+//        
+//  return Out_u32;  
+            
+//#define SILENCE         0
+//#define MA              1
+//#define GA              2
+//#define MAGA            3 
+
+  return create_RX_out (1, R.SSB_Out_F, R.GA_SSB_Out_F);
+
 }
 
 
@@ -3176,6 +3187,60 @@ float mag;
 
 
 
+
+
+//******************************************************************************
+//   Формирование выходного сигнала приемника из двух входов Right-Out SPK
+//******************************************************************************
+/*
+Выходной сигнал для УНЧ идет из правого канала кодека. Правый канал идет из старшей
+половины uint32. 
+В зависимости от переключателя Ch:
+#define SILENCE         0
+#define MA              1
+#define GA              2
+#define MAGA            3 
+
+формируется выходной сигнал. Для отдельных каналов просто переносится в старшую часть,
+для совместного воспроизведения каналы складываются, ограничиваются и потом сдвигаются
+в старшую половину выходного uint32 слова.
+
+*/
+static uint32_t create_RX_out (uint8_t Ch, float MA_Ch, float GA_Ch) {
+uint32_t Out_u32 = 0; 
+int16_t Tmp;
+
+  switch (Ch){
+    case 0:                                                                     // SILENCE
+      Out_u32 = 0;
+    break;
+    
+    case 1:                                                                     // MA 
+      Tmp = (int16_t)MA_Ch;
+      Out_u32 = Tmp << 16;
+    break;
+    
+    case 2:                                                                     // GA
+      Tmp = (int16_t)GA_Ch;
+      Out_u32 = Tmp << 16;
+    break;
+    
+    case 3:                                                                     // MAGA
+      Tmp = (int16_t)(MA_Ch + GA_Ch);
+      Out_u32 = Tmp << 16;
+      if ((MA_Ch + GA_Ch) > 32000) {
+        Tmp = 32000;
+        Out_u32 = Tmp << 16;
+      } 
+      if ((MA_Ch + GA_Ch) < -32000) {
+        Tmp = -32000;
+        Out_u32 = Tmp << 16;
+      }
+    break;
+  }
+
+return Out_u32;
+};                 
 
 
 //******************************************************************************
