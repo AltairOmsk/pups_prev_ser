@@ -571,7 +571,7 @@ void set_TXRX_mode (TXRX_MODE_e TXRX_Mode) {
       - Левый канал скоммутировать на IN1_L (ГА антенну)
       
       */
-      codec_RX_mode();
+      //codec_RX_mode();
       
       // Включить прием
       //off_HW_TX();
@@ -1148,10 +1148,14 @@ float Tmp_f;
       R.Buf_LPF_8k_I[127] = LPF_128 (R.Buf_BPF_8k, LPF128_coeff_BPF);
       R.Buf_LPF_8k_Q[127] = R.Buf_LPF_8k_I[127];
       
-      if (R.SQL_Enable){                                                        // Сигнал отрытия шумоподавителя на N тактов после разрешения шумоподавителя
-          R.Buf_LPF_8k_I[127] = sql_tx(&(R.SQL_Enable));
-          R.Buf_LPF_8k_Q[127] = R.Buf_LPF_8k_I[127];
-      }
+//      if (R.SQL_Enable){                                                        // Сигнал отрытия шумоподавителя на N тактов после разрешения шумоподавителя
+//          R.Buf_LPF_8k_I[127] = sql_tx(&(R.SQL_Enable));
+//          R.Buf_LPF_8k_Q[127] = R.Buf_LPF_8k_I[127];
+//      }
+      
+      R.Buf_LPF_8k_I[127] = create_TX_SQL_signal (&R.SQL_TX_signal, 1024, R.Buf_LPF_8k_I[127]); // Сигнал открытия шумоподавителя
+      
+      
       
       
       shift_buf_128(R.Buf_BPF_8k);                                              // Сдвиг фильтра корректора  
@@ -2919,6 +2923,7 @@ static uint16_t PushCnt, ReleaseCnt;
           __LED2_ON;
           R.TXRX_Mode = TX;
           set_TXRX_mode(R.TXRX_Mode);
+          R.SQL_TX_signal = 1810;
           //__LAMP_ON; $$$
           __no_operation();
           __no_operation();
@@ -2934,6 +2939,7 @@ static uint16_t PushCnt, ReleaseCnt;
       if (ReleaseCnt == DEBOUNCE_TMR){
         PushCnt = 0;
         //---------------------------------------------------------------------- Release PTT routine
+                //R.SQL_TX_signal = 237;                                        // Сделать что бы сначала передавался сигнал, а потом переводился режим RXTX
         __LED2_OFF;
         R.TXRX_Mode = RX;
         //__LAMP_OFF; $$$
