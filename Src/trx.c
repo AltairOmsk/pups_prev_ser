@@ -779,7 +779,7 @@ break;
   
   
 case TX:
-//  __LAMP_ON; $$$
+//  __LAMP_ON; $$$ 
         switch (R.ADC_DataReady){
           case HALF_RX:                                                         //  HALF 
             for (i=0;i<(HALF_DMA_SHIFT/2);i++){                                 //  В начало буфера передачи положить 48 отсчетов для DAC, с шагом 2
